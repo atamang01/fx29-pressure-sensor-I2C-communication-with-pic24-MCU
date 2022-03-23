@@ -28,7 +28,6 @@ void ms_delay(int N) // miliseocnd dlay
 }
 
 char ReadLCD(int addr) {
-    // As for dummy read, see 13.4.2, the first read has previous value in PMDIN1
     int dummy;
     while (PMMODEbits.BUSY); // wait for PMP to be available
     PMADDR = addr; // select the command address
@@ -36,6 +35,7 @@ char ReadLCD(int addr) {
     while (PMMODEbits.BUSY); // wait for PMP to be available
     return ( PMDIN1); // read the status register
 } // ReadLCD
+
 // In the following, addr = 0 -> access Control, addr = 1 -> access Data
 #define BusyLCD() ReadLCD( 0) & 0x80 // D<7> = Busy Flag
 #define AddrLCD() ReadLCD( 0) & 0x7F // Not actually used here
@@ -50,8 +50,8 @@ void WriteLCD(int addr, char c) {
 // In the following, addr = 0 -> access Control, addr = 1 -> access Data
 #define putLCD( d) WriteLCD( 1, (d))
 #define CmdLCD( c) WriteLCD( 0, (c))
-#define HomeLCD() WriteLCD( 0, 2) // See HD44780 instruction set in
-#define ClrLCD() WriteLCD( 0, 1) // Table 9.1 of text book
+#define HomeLCD() WriteLCD( 0, 2) 
+#define ClrLCD() WriteLCD( 0, 1) 
 
 void InitLCD(void) {
     // PMP is in Master Mode 1, simply by writing to PMDIN1 the PMP takes care
@@ -68,14 +68,13 @@ void InitLCD(void) {
 } // InitLCD
 
 void InitPMP(void) {
-    // PMP initialization. See my notes in Sec 13 PMP of Fam. Ref. Manual
     PMCON = 0x8303; // Following Fig. 13-34. Text says 0x83BF (it works) *
     PMMODE = 0x03FF; // Master Mode 1. 8-bit data, long waits.
     PMAEN = 0x0001; // PMA0 enabled
 }
 
 void putsLCD(char *s) {
-    while (*s) putLCD(*s++); // See paragraph starting at bottom, pg. 87 text
+    while (*s) putLCD(*s++);
 } //putsLCD
 
 void SetCursorAtLine(int i) {
@@ -185,8 +184,7 @@ float output_fun(uint8_t Force_applied) {
 }
 
 
-
-
+//this code does not callibrate 
 
 void main(void) {
     int hibyte, lowbyte; //variable for high byte and low byte
@@ -200,7 +198,7 @@ void main(void) {
     while (1) {
 
         I2CStart(); // start the I2C
-        I2Csendbyte(0x50); // send write command to the I2C
+        I2Csendbyte(0x50); // send write command to the I2C address 0x28 
         us_delay(100); // delay to be safe
         I2Csendbyte(0x00); // send low bye
         us_delay(100); //100 us delay
@@ -215,12 +213,12 @@ void main(void) {
         us_delay(100);
         I2Cgetbyte();
         //I2C1CONbits.ACKEN = 1; // Master sends Acknowledge
-        hibyte = I2C1RCV; //force
+        hibyte = I2C1RCV; // 1st byte
 
         us_delay(200);
         I2Cgetbyte();
         //  I2C1CONbits.ACKEN = 1; // Master sends Acknowledge
-        lowbyte = I2C1RCV; 
+        lowbyte = I2C1RCV; //2nd byte
 
         us_delay(200);
         I2CStop();
@@ -234,7 +232,7 @@ void main(void) {
         
         int16_t bytes; 
         
-        bytes = hibyte<<8|lowbyte; 
+        bytes = hibyte<<8|lowbyte; //combining both byte
         
         //float total; 
        // total =  (hibyte)*(5/1023); 
