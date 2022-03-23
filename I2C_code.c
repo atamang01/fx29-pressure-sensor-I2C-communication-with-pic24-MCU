@@ -1,6 +1,6 @@
 /* 
  * File:   I2C_code.c
- * Author: at152
+ * Author: atamang
  *
  * Created on February 9, 2022, 4:46 PM
  */
